@@ -178,9 +178,6 @@ Writing your own lambda expressions:
 | ----- | ----- |
 | *Question* | Ok, so lambdas are those small anonymous functions! But how and where do we use them ? |
 | *Answer* | We just pass them around. Lambdas can be parameters for functions, constructors and they can be kept in variables! |
-
-| | |
-| ----- | ----- |
 | *Question* | Oh wait, Java is strongly typed. Is “Lambda” a new type ?  |
 | *Answer* | Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**. |
 
