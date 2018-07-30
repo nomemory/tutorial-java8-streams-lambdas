@@ -67,7 +67,7 @@ public static Map<String, Long> groupAndCountDepartments(List<Employee> employee
 
 Is the code more concise and readable ? Let's be honest to ourselves, it isn't very readable if this is the first interaction with those "weird concepts and syntax", but after a short initial investment the benefits will become more and more obvious.
 
-Lambda expressions can be considered an elegant way of "storing" and referencing behavio, while Streams API comes with a with functionality similar to SQL but much more powerful when it comes to using/re-using the behavior we are encapsulating in lambda expressions. 
+Lambda expressions can be considered an elegant way of "storing" and referencing behavior, while Streams API comes with a with functionality similar to SQL but much more powerful when it comes to using/re-using the behavior we are encapsulating in lambda expressions. 
 
 ## Lambdas
 
@@ -138,6 +138,12 @@ As you can see in the previous examples the structure of a Lambda is as follows:
 
 `(Param1, Param2, Param2) -> {}`
 
+| Lambda Expression | Is Valid ? | Comments |
+| ----------------- | ---------- | -------- |
+| `() -> {}` | :white_check_mark: | This lambda is a function with no input parameters and returns void. The equivalent method would look like: `public void run() {}` |
+| `() -> “Example1”` | :white_check_mark: | This lambda is a function with no input parameters and returns a string: “Example1”. The equivalent method:
+`public void something() { return “Example1”; }` |
+| `() -> { return “Example1”; } ` | :white_check_mark: | This is the same lambda method as above, but instead we are using an explicit return statement. |
 
 
 
