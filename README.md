@@ -203,10 +203,12 @@ public interface Runnable {
 
 The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`.
 
+Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. Creating our own functional interfaces is not uncommon, but because all that's defined `java.utill.function` is generic - we can re-use what we have for different types.
+
 Example:
 
 ```java
-  // (T) -> return Boolean;
+// (T) -> return Boolean;
 Predicate<String> containsComma = (str) -> str.contains(",");
 
 // (T) -> void
@@ -221,4 +223,5 @@ BiFunction<String, Integer, String> repeatNTimes=
                 (str, times) -> new String(new char[times]).replace("\0", str);
 ```
 
-Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method (it doesn't matter how many `default` methods they contain). 
+If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. They "store behavior", "behavior" that can be passed around your code and played with.
+
