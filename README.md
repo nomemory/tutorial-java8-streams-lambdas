@@ -1,1 +1,1 @@
-# Java 8 Streams & Lambdas
+# Streams & Lambdas
