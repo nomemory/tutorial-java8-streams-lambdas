@@ -76,23 +76,13 @@ It’s a **concise** representation of an **anonymous** **function** that can be
 * function → just like a function it has a body, a return type, and list of parameters;
 * passed around → the lambda can be passed as parameter or kept in a variable.
 
-Bad News:
+**Bad News**:
 * Lambdas technically don't let you do anything that you couldn't do prior to Java 8. 
 
-Good news:
+**Good news**:
 * You are no longer required to write long and tedious declarations.
 
-| Comparator (OLD) | Comparator (NEW) |
-| ------------- | ------------- |
-|
-```java
-Test
-```
-|
-```java
-Test
-```
-|
+
 
 
 
