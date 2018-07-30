@@ -71,19 +71,19 @@ Is the code more concise and readable ? Let's be honest to ourselves, it isn't v
 
 ### What is Lambda ?
 
-<sup>Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet...</sup>
+<sup>Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet... Also a mandatory concept to understand before jumping into Streams.</sup>
 
-It’s a **concise** representation of an **anonymous** **function** that can be **passed around**.
+Lambda is also a **concise** representation of an **anonymous** **function** that can be **passed around**.
 * concise → no need to write boilerplate code (remember *Anonymous Classes...*);
 * anonymous → the lambda doesn’t have a name;
 * function → just like a function it has a body, a return type, and list of parameters;
-* passed around → the lambda can be passed as parameter or kept in a variable.
+* passed around → the lambda can be passed as parameter or referenced by a variable.
 
 **Bad News**:
 * Lambdas technically don't let you do anything that you couldn't do prior to Java 8. 
 
 **Good news**:
-* You are no longer required to write long and tedious declarations (remember *Anonymous Classes...*).
+* You are no longer required to write long and tedious declarations (remember *Anonymous Classes...*). 
 
 For example in order to sort the employees by their salary we are no longer to write a `Comparator<Employee>` using an anonymous class:
 
@@ -109,7 +109,7 @@ Comparator<Employee> bySalary = (e1, e2) -> e1.getSalary().compareTo(e2.getSalar
 Collections.sort(employees, bySalary);
 ```
 
-Or for creating something as simple as a `Runnable` we won't have to write:
+For creating something as simple as a `Runnable` we will never have to write:
 
 ```java
 // Anonymous Runnable
@@ -122,7 +122,7 @@ Runnable runnable1 = new Runnable() {
 runnable1.run();
 ``` 
 
-But a simple lambda expression instead:
+A simple lambda expression will do:
 
 ```java
  // Lambda Runnable
@@ -132,7 +132,11 @@ runnable2.run();
 
 ### The structure of a Lambda 
 
+The structure of the Lambda is as follows:
 
+`(T t1, T t2, ...) -> { return R }`
+
+(List of Params) (Arrow Separator) (Body Of Code)
 
 
 
