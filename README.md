@@ -141,8 +141,7 @@ As you can see in the previous examples the structure of a Lambda is as follows:
 | Lambda Expression | Is Valid ? | Comments |
 | ----------------- | ---------- | -------- |
 | `() -> {}` | :white_check_mark: | This lambda is a function with no input parameters and returns void. The equivalent method would look like: `public void run() {}` |
-| `() -> “Example1”` | :white_check_mark: | This lambda is a function with no input parameters and returns a string: “Example1”. The equivalent method:
-`public void something() { return “Example1”; }` |
+| `() -> “Example1”` | :white_check_mark: | This lambda is a function with no input parameters and returns a string: “Example1”. The equivalent method: `public void something() { return “Example1”; }` |
 | `() -> { return “Example1”; } ` | :white_check_mark: | This is the same lambda method as above, but instead we are using an explicit return statement. |
 
 
