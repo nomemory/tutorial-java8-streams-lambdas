@@ -6,6 +6,7 @@
 
 ## Introduction
 
+
 Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all our problems let's start by ... doing some code-work. 
 
 We will write a simple method that takes a `List<Employee>` as input and then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. 
@@ -69,9 +70,12 @@ Is the code more concise and readable ? Let's be honest to ourselves, it isn't v
 
 Lambda expressions can be considered an elegant way of "storing" and referencing behavior, while Streams API comes with a with functionality similar to SQL but much more powerful when it comes to using/re-using the behavior we are encapsulating in lambda expressions. 
 
+
 ## Lambdas
 
+
 ### What is Lambda ?
+
 
 <sup>Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet... Also a mandatory concept to understand before jumping into Streams.</sup>
 
@@ -172,7 +176,9 @@ Writing lambda expressions involes some few basic rules:
 
 * :white_check_mark: `(Integer a, Integer b) -> a * b;`
 
+
 ### `@FunctionalInterface`
+
 
 | | |
 | ----- | ----- |
@@ -181,7 +187,7 @@ Writing lambda expressions involes some few basic rules:
 | *Question* | Oh wait, Java is strongly typed. Is “Lambda” a new type ?  |
 | *Answer* | Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**. |
 
-**Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`.
+To be more clear, **Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`.
 
 The most obvious examples from the Java API are:
 
@@ -190,6 +196,7 @@ The most obvious examples from the Java API are:
 public interface Comparator<T> {
 	int compare(T o1, T o2);
 }
+...
 ```
 
 Or:
@@ -199,11 +206,14 @@ Or:
 public interface Runnable {
 	void run();
 }
+...
 ```
 
 The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`.
 
-Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. Creating our own functional interfaces is not uncommon, but because all that's defined `java.utill.function` is generic it adds a high degree of reusability. 
+Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. 
+
+Creating our own functional interfaces is not uncommon, but because all the interfaces defined in `java.utill.function` are generic we should them re-use them as much as possible.
 
 Example:
 
@@ -215,15 +225,19 @@ Predicate<String> containsComma = (str) -> str.contains(",");
 Consumer<String> printUpperCase = (str) -> str.toLowerCase();
 
 // (T1) -> return (T2);
+// Magic method to count the vocals
 Function<String, Integer> countVocals =
                 (str) -> str.replaceAll("[^aeiouAEIOU]","").length();
 
 // (T1, T2) -> return (T3);
+// Magic-method to repeat a String. 
 BiFunction<String, Integer, String> repeatNTimes=
                 (str, times) -> new String(new char[times]).replace("\0", str);
 ```
 
 If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. They "store behavior", "behavior" that can be passed around your code and played with.
+
+#### A lambda returning a lambda 
 
 To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
 
@@ -243,6 +257,31 @@ System.out.println(add3.apply(1)); // result: 4
 System.out.prinltn(add5.apply(3)); // result: 8
 ```
 
+#### Writing our own forEach method
 
+The purpose of this exercise is to write our own `forEach` method:
+* Traverse the `Iterable` collection;
+* Check if the element passes a certain condition (think `Predicate`);
+* Consums each element of the collection (think `Consumer`).
+
+```java
+public static void forEach(Iterable<String> iterable, Predicate<String> predicate, Consumer<String> consumer) {
+    for(String s : iterable)
+        if (predicate.test(s)) // The condition is passed down (input parameter)
+            consumer.accept(s); // The behavior is passed down (input parameter)
+}
+```
+
+```java
+ List<String> list = new ArrayList<>(Arrays.asList("abc", "det", "delo", "itte"));
+
+// Prints "det", "delo"
+forEach(list, (s) -> s.startsWith("d"), System.out::println);
+
+// Prints "abc", "det", "Delo", "itte"
+Predicate<String> nonEmpty = (String s) -> s != null && s.length()!=0;
+Consumer<String> printItToConsole = System.out::println;
+forEach(list, nonEmpty, printItToConsole);
+```
 
 
