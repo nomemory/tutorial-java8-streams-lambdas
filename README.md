@@ -6,7 +6,7 @@
 
 ## Introduction
 
-Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all our problems let's start by ... doing some code-work - you know the "Before And After". 
+Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all our problems let's start by ... doing some code-work. 
 
 We will write a simple method that takes a `List<Employee>` as input and then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. 
 
@@ -132,11 +132,11 @@ runnable2.run();
 
 ### The structure of a Lambda 
 
-The structure of the Lambda is as follows:
+As you can see in the previous examples the structure of a Lambda is as follows:
 
-`(T t1, T t2, ...) -> { return R }`
+`(Param1, Param2, Param2) -> {}`
 
-(List of Params) (Arrow Separator) (Body Of Code)
+![streams-lambdas-main](media/streams-lambdas-lambda-structure.png)
 
 
 
