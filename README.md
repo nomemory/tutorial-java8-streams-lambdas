@@ -71,7 +71,7 @@ Is the code more concise and readable ? Let's be honest to ourselves, it isn't v
 
 ### What is Lambda ?
 
-**Lambda, Λ, λ (uppercase Λ, lowercase λ; Greek: λάμ(β)δα lám(b)da) is the 11th letter of the Greek alphabet...**
+*Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet...*
 
 It’s a **concise** representation of an **anonymous** **function** that can be **passed around**.
 * concise → no need to write boilerplate code (remember *Anonymous Classes...*);
