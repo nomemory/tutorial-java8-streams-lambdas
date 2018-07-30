@@ -2,7 +2,7 @@
 
 ![streams-lambdas-main](media/streams-lambdas-main.jpg)
 
-[#half-life-3-confirmed](https://kotaku.com/tag/half-life-3)
+**half-life-3-confirmed**
 
 ## Introduction
 
@@ -148,7 +148,7 @@ Writing your own lambda expressions:
 
 *This lambda is a function with no input parameters and returns a string: “Example1”. The return statement is implicit (we don't need to write it). The equivalent method:* `public void something() { return “Example1”; }`
 
-* :white_check_mark: Valid `() -> { return “Example1”; } ` → 
+* :white_check_mark: `() -> { return “Example1”; } ` → 
 
 *This is the same lambda method as above, but instead of the implicit return statement we are using an explicit one.*
 
@@ -171,6 +171,41 @@ Writing your own lambda expressions:
 * :white_check_mark: `(Message msg) -> { System.out.println(msg.getHeader()); }`
 
 * :white_check_mark: `(Integer a, Integer b) -> a * b;`
+
+### `@FunctionalInterface`
+
+*Question*: Ok, so lambdas are those small anonymous functions! But how and where do we use them ?
+
+*Answer*: We just pass them around. Lambdas can be parameters for functions, constructors and they can be kept in variables!
+
+*Question*: Oh wait, Java is strongly typed. Is “Lambda” a new type ? 
+
+*Answer*: Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**.
+
+**Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`.
+
+The most obvious examples from the Java API are:
+
+```java
+@FunctionalInterface
+public interface Comparator<T> {
+	int compare(T o1, T o2);
+}
+```
+
+Or:
+
+```java
+@FunctionalInterface
+public interface Runnable {
+	void run();
+}
+```
+
+The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code.
+
+Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method (it doesn't matter how many `default` methods they contain).
+
 
 
 
