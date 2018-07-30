@@ -2,5 +2,5 @@
 
 ![streams-lambdas-main](media/streams-lambdas-main.jpg)
 
-*HL3 confirmed*
+[#half-life-3-confirmed](https://kotaku.com/tag/half-life-3)
 
