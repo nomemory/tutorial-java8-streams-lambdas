@@ -140,29 +140,32 @@ As you can see in the previous examples the structure of a Lambda is as follows:
 
 Writing your own lambda expressions:
 
-* `() -> {}` → :white_check_mark: Valid
+* :white_check_mark: `() -> {}` →
 
 *This lambda is a function with no input parameters and returns void. The equivalent method would look like:* `public void run() {}`.
 
-* `() -> “Example1”` → :white_check_mark: Valid
+* :white_check_mark: `() -> “Example1”` →
 
-*This lambda is a function with no input parameters and returns a string: “Example1”. The equivalent method:* `public void something() { return “Example1”; }`
+*This lambda is a function with no input parameters and returns a string: “Example1”. The return statement is implicit (we don't need to write it). The equivalent method:* `public void something() { return “Example1”; }`
 
-* `() -> { return “Example1”; } ` → :white_check_mark: Valid
+* :white_check_mark: Valid `() -> { return “Example1”; } ` → 
 
-*This is the same lambda method as above, but instead we are using an explicit return statement.*
+*This is the same lambda method as above, but instead of the implicit return statement we are using an explicit one.*
 
-* `() ->  String s = “abc” ; s + s;` → :x: Invalid
+* :x: `() ->  String s = “abc” ; s + s;` →
 
 *If the lambda body is a block of statements, or the lambda has no value - we need to include brackets.*
 
-* `() ->  { String s = “abc” ; s + s; }` → :x: Invalid
+* :x: `() ->  { String s = “abc” ; s + s; }` →
 
 *This lambda is still invalid because it's a block of statements but it doesn't have a return statement.*
 
-* `() ->  { String s = “abc” ; return s + s; }` → :white_check_mark: Valid
+* :white_check_mark: `() ->  { String s = “abc” ; return s + s; }` →
 
-*This is valid lambda that returns the string: `"abcabc"`.
+*This is valid lambda that returns the string:* `"abcabc"`.
+
+
+
 
 
 
