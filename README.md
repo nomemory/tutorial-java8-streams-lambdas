@@ -140,14 +140,29 @@ As you can see in the previous examples the structure of a Lambda is as follows:
 
 Writing your own lambda expressions:
 
-* `() -> {}` → :white_check_mark: 
-*This lambda is a function with no input parameters and returns void. The equivalent method would look like: `public void run() {}`.*
+* `() -> {}` → :white_check_mark: Valid
 
-* `() -> “Example1”` → :white_check_mark: 
-*This lambda is a function with no input parameters and returns a string: “Example1”. The equivalent method: `public void something() { return “Example1”; }`*
+*This lambda is a function with no input parameters and returns void. The equivalent method would look like:* `public void run() {}`.
 
-* `() -> { return “Example1”; } ` → :white_check_mark:
+* `() -> “Example1”` → :white_check_mark: Valid
+
+*This lambda is a function with no input parameters and returns a string: “Example1”. The equivalent method:* `public void something() { return “Example1”; }`
+
+* `() -> { return “Example1”; } ` → :white_check_mark: Valid
+
 *This is the same lambda method as above, but instead we are using an explicit return statement.*
+
+* `() ->  String s = “abc” ; s + s;` → :x: Invalid
+
+*If the lambda body is a block of statements, or the lambda has no value - we need to include brackets.*
+
+* `() ->  { String s = “abc” ; s + s; }` → :x: Invalid
+
+*This lambda is still invalid because it's a block of statements but it doesn't have a return statement.*
+
+* `() ->  { String s = “abc” ; return s + s; }` → :white_check_mark: Valid
+
+*This is valid lambda that returns the string: `"abcabc"`.
 
 
 
