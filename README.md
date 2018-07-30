@@ -45,7 +45,7 @@ But what if tell you `groupingBy` is a thing that is "built-in" in the Stream AP
 ```java
 public static Map<String, List<Employee>> groupByDepartmentsF(List<Employee> employees) {
     return employees.stream()
-                    .collect(groupingBy(Employee::getDepartment));
+                    .collect(groupingBy(Employee::getDepartment)); // Employee:getDepartment is a lambda
 }
 ```
 
@@ -60,12 +60,14 @@ I will let you write the imperative implementation by yourself as an exercise, b
 ```java
 public static Map<String, Long> groupAndCountDepartments(List<Employee> employees) {
     return employees.stream()
-                    .map(Employee::getDepartment)
+                    .map(Employee::getDepartment) // Employee:getDepartment is a lambda
                     .collect(groupingBy(identity(), counting()));
 }
 ```
 
 Is the code more concise and readable ? Let's be honest to ourselves, it isn't very readable if this is the first interaction with those "weird concepts and syntax", but after a short initial investment the benefits will become more and more obvious.
+
+Lambda expressions can be considered an elegant way of "storing" and referencing behavio, while Streams API comes with a with functionality similar to SQL but much more powerful when it comes to using/re-using the behavior we are encapsulating in lambda expressions. 
 
 ## Lambdas
 
@@ -136,7 +138,7 @@ As you can see in the previous examples the structure of a Lambda is as follows:
 
 `(Param1, Param2, Param2) -> {}`
 
-![streams-lambdas-main](media/streams-lambdas-lambda-structure.png)
+
 
 
 
