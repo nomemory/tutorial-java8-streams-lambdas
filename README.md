@@ -164,6 +164,14 @@ Writing your own lambda expressions:
 
 *This is valid lambda that returns the string:* `"abcabc"`.
 
+* :white_check_mark: `(List<String> list) -> list.isEmpty()`
+
+* :white_check_mark: `() -> new Apple(10)`
+
+* :white_check_mark: `(Message msg) -> { System.out.println(msg.getHeader()); }`
+
+* :white_check_mark: `(Integer a, Integer b) -> a * b;`
+
 
 
 
