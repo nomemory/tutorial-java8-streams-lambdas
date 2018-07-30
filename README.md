@@ -84,10 +84,12 @@ Good news:
 
 | Comparator (OLD) | Comparator (NEW) |
 | ------------- | ------------- |
-|```java
+|
+```java
 Test
 ```
-|```java
+|
+```java
 Test
 ```
 |
