@@ -201,18 +201,24 @@ public interface Runnable {
 }
 ```
 
-The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code.
+The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`.
 
-Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method (it doesn't matter how many `default` methods they contain).
+Example:
 
+```java
+  // (T) -> return Boolean;
+Predicate<String> containsComma = (str) -> str.contains(",");
 
+// (T) -> void
+Consumer<String> printUpperCase = (str) -> str.toLowerCase();
 
+// (T1) -> return (T2);
+Function<String, Integer> countVocals =
+                (str) -> str.replaceAll("[^aeiouAEIOU]","").length();
 
+// (T1, T2) -> return (T3);
+BiFunction<String, Integer, String> repeatNTimes=
+                (str, times) -> new String(new char[times]).replace("\0", str);
+```
 
-
-
-
-
-
-
-
+Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method (it doesn't matter how many `default` methods they contain). 
