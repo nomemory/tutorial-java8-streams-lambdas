@@ -136,9 +136,9 @@ runnable2.run();
 
 As you can see in the previous examples the structure of a Lambda is as follows:
 
-`(Param1, Param2, Param2) -> {}`
+`(Param1, Param2, ..., ParamN) -> { /* do something ||&& return something */}`
 
-Writing your own lambda expressions:
+Writing lambda expressions involes some few basic rules:
 
 * :white_check_mark: `() -> {}` →
 
@@ -176,7 +176,7 @@ Writing your own lambda expressions:
 
 | | |
 | ----- | ----- |
-| *Question* | Ok, so lambdas are those small anonymous functions! But how and where do we use them ? |
+| *Question* | So lambdas are those small anonymous functions! But how and where do we use them ? |
 | *Answer* | We just pass them around. Lambdas can be parameters for functions, constructors and they can be kept in variables! |
 | *Question* | Oh wait, Java is strongly typed. Is “Lambda” a new type ?  |
 | *Answer* | Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**. |
@@ -203,7 +203,7 @@ public interface Runnable {
 
 The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`.
 
-Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. Creating our own functional interfaces is not uncommon, but because all that's defined `java.utill.function` is generic - we can re-use what we have for different types.
+Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. Creating our own functional interfaces is not uncommon, but because all that's defined `java.utill.function` is generic it adds a high degree of reusability. 
 
 Example:
 
@@ -224,4 +224,25 @@ BiFunction<String, Integer, String> repeatNTimes=
 ```
 
 If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. They "store behavior", "behavior" that can be passed around your code and played with.
+
+To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
+
+Check the following example:
+```java
+// Defines a lambda that returns partially initialized lambdas
+Function<Integer, Function<Integer, Integer>> createAdder = (adder) -> 
+                                                                (number) -> number + adder;
+
+// Creates a function that adds 3 to a number
+Function<Integer, Integer> add3 = createAdder.apply(3);
+// Creates a function that adds 5 to a number                                                                 
+Function<Integer, Integer> add5 = createAdder.apply(5);
+
+// Use the methods
+System.out.println(add3.apply(1)); // result: 4
+System.out.prinltn(add5.apply(3)); // result: 8
+```
+
+
+
 
