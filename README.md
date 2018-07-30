@@ -21,6 +21,7 @@ public class Employee {
     public String name;
     public String department;
     public Long managerId;
+    public BigDecimal salary;
 }
 ```
 
@@ -64,7 +65,7 @@ public static Map<String, Long> groupAndCountDepartments(List<Employee> employee
 }
 ```
 
-Is the code more concise and readable ? Let's be honest with ourselves, it isn't very readable if this is the first interaction with those "weird concepts and syntax", but after a short initial investment the benefits will become more and more obvious.
+Is the code more concise and readable ? Let's be honest to ourselves, it isn't very readable if this is the first interaction with those "weird concepts and syntax", but after a short initial investment the benefits will become more and more obvious.
 
 ## Lambdas
 
@@ -80,11 +81,54 @@ It’s a **concise** representation of an **anonymous** **function** that can be
 * Lambdas technically don't let you do anything that you couldn't do prior to Java 8. 
 
 **Good news**:
-* You are no longer required to write long and tedious declarations.
+* You are no longer required to write long and tedious declarations (remember *Anonymous Classes...*).
 
+For example in order to sort the employees by their salary we are no longer to write a `Comparator<Employee>` using an anonymous class:
 
+```java
+// Anonymous Class Example
+// Don't forget to null check
+Comparator<Employee> bySalary = new Comparator<Employee>() {
+    @Override
+    public int compare(Employee e1, Employee e2) {
+        return e1.getSalary().compareTo(e2.getSalary());
+    }
+};
 
+Collections.sort(employees, bySalary);
+```
 
+We can use a lambda instead:
+
+```java
+// Lambda Example
+// Don't forget to null check
+Comparator<Employee> bySalary = (e1, e2) -> e1.getSalary().compareTo(e2.getSalary());
+Collections.sort(employees, bySalary);
+```
+
+Or for creating something as simple as a `Runnable` we won't have to write:
+
+```java
+// Anonymous Runnable
+Runnable runnable1 = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Running!");
+    }
+};
+runnable1.run();
+``` 
+
+But a simple lambda expression instead:
+
+```java
+ // Lambda Runnable
+Runnable runnable2 = () -> System.out.println("Running!");
+runnable2.run();
+```
+
+### The structure of a Lambda 
 
 
 
