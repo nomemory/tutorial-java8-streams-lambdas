@@ -82,10 +82,16 @@ Bad News:
 Good news:
 * You are no longer required to write long and tedious declarations.
 
-| First Header  | Second Header |
+| Comparator (OLD) | Comparator (NEW) |
 | ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+|```java
+Test
+```
+|```java
+Test
+```
+|
+
 
 
 
