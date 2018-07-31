@@ -94,7 +94,7 @@ Lambda is also a **concise** representation of an **anonymous** **function** tha
 * passed around → the lambda can be passed as parameter or referenced by a variable.
 
 **Bad News**:
-* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. In a way lambdas are nothing more than syntactic sugar. 
+* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. For the eye of the programmer lambdas can be seen as "syntactic" sugar for anonymous inner classes (even if they are implemented differently and they generate different instructions after compilation).  
 
 **Good news**:
 * You are no longer required to write long and tedious declarations (remember *Anonymous Classes...*). 
@@ -287,13 +287,36 @@ Function<String, String> putInBrackets = (s) -> "[" + s + "]";
 Function<String, String> putInQuotes = (s) -> "\"" + s + "\"";
 
 // Equivalent to putInQuotes(putInBrackets("ABC"))
+// g(f(x)) <=> (gof)(x)
 String s1 = putInBrackets.andThen(putInQuotes).apply("ABC");
 System.out.println(s1); // Output: "[ABC]"
 
 // Equivalent to putInBrackets(putInQuotes("ABC"))
+// f(g(x)) <=> (fog)(x)
 String s2 = putInBrackets.compose(putInQuotes).apply("ABC");
 System.out.println(s2); // Output: ["ABC"]
 ```
+
+### Referencing existing method with lambda using `::` notation
+
+The `::` notation is mainly used to reference existing methods, static methods or even constructors. 
+
+So for example if we want to sort a `String[]` using the `compareToIgnoreCase()` method from the [String class](docs.oracle.com/javase/8/docs/api/java/lang/String.html) we would write something like this:
+
+```java
+String[] stringArray = { "Andrei", "ion", "Sara", "Avraham", "Steven", "deborah", "michael" };
+Arrays.sort(stringArray, (s1, s2) -> s1.compareToIgnoreCase(s2));
+```
+
+Instead of writing a lambda that uses the `compareToIgnoreCase()` explicitily we can reference the method directly just like in the following example:
+
+```java
+ String[] stringArray = { "Andrei", "ion", "Sara", "Avraham", "Steven", "deborah", "michael" };
+Arrays.sort(stringArray, String::compareToIgnoreCase);
+```
+
+In the above example `s1` will become the object on which we call the method `String::compareToIgnoreCase`, while `s2` represents the the input parameter of the method. The nice part is we don't have to explicitily write them.  
+
 
 #### Example: A lambda returning a lambda 
 
