@@ -79,7 +79,6 @@ public static Map<String, Long> groupAndCountDepartments(List<Employee> employee
 
 Is the code more concise and readable ? Let's be honest to ourselves, it isn't very readable if this is the first interaction with those "weird concepts and syntax", but after a short initial investment the benefits will become more and more obvious.
 
-
 ## Lambdas
 
 
@@ -120,7 +119,6 @@ We can use a lambdas instead:
 ```java
 // Lambda Example
 // Don't forget to null check
-
 Comparator<Employee> bySalary = (e1, e2) -> e1.getSalary().compareTo(e2.getSalary());
 Collections.sort(employees, bySalary);
 
@@ -130,7 +128,7 @@ Collections.sort(employees, (e1, e2) -> e1.getSalary().compareTo(e2.getSalary())
 
 // OR
 
-Collections.sort(employees, Comparator.comparing(Employee::getSalary));
+Collections.sort(employees, Comparator.comparing(Employee::getSalary)) // Employee::getSalary is also a lambda!
 ```
 
 For creating something as simple as a `Runnable` we will never have to write:
@@ -168,15 +166,15 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 * :white_check_mark: `() -> “Example1”` →
 
-*This lambda is a function with no input parameters and returns a string: “Example1”. The return statement is implicit (we don't need to write it). The equivalent method:* `public void something() { return “Example1”; }`
+*This lambda is a function with no input parameters and returns a string: “Example1”. The return statement is implicit (we don't need to write it). The equivalent method is:* `public void something() { return “Example1”; }`
 
 * :white_check_mark: `() -> { return “Example1”; } ` → 
 
-*This is the same lambda method as above, but instead of the implicit return statement we are using an explicit one.*
+*This is the same lambda method as above, but instead of the implicit return statement we are using an explicit one. For brevity I prefer the initial version.*
 
 * :x: `() ->  String s = “abc” ; s + s;` →
 
-*If the lambda body is a block of statements, or the lambda has no value - we need to include brackets.*
+*The above lambda is "invalid". The rule states that if the lambda body is a block of statements - we need to include brackets. Brackets can be omitted only if the lambda is a one-liner.*
 
 * :x: `() ->  { String s = “abc” ; s + s; }` →
 
@@ -184,11 +182,11 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 * :white_check_mark: `() ->  { String s = “abc” ; return s + s; }` →
 
-*This is a valid lambda that returns the string:* `"abcabc"`.*
+*This is a valid lambda that (always) returns the string:* `"abcabc"`.*
 
 * :white_check_mark: `(List<String> list) -> list.isEmpty()`
 
-*This is valid lambda. In most of the cases there's no need to specify the type of the input parameters, as the type is inferred from the context.*
+*This is valid lambda. In most of the cases there's no need to specify the type of the input parameters, as the type is inferred from the context. You could've ommited the types by simply writing: `(list) -> list.isEmpty`*
 
 * :white_check_mark: `() -> new Apple(10)`
 
@@ -199,7 +197,7 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 ### `@FunctionalInterface`
 
-**Q** :question: So lambdas are those small anonymous functions! But how and where do we use them ?
+**Q** :question: So lambdas are anonymous functions with a body but without a name ! How and where do we use them ?
 
  * We just pass them around. Lambdas can be parameters for functions, constructors and they can be kept in variables! |
  
@@ -217,6 +215,9 @@ public interface Comparator<T> {
     // The one and only abstract method from the interface
 	int compare(T o1, T o2);
 }
+
+// That's why we can write:
+Comparator<T> comp = (T t1, T t2) -> { /*...*/ }
 ...
 ```
 
@@ -231,11 +232,11 @@ public interface Runnable {
 ...
 ```
 
-The `java.utill.function` package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`.
+The [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`. Those interfaces represent the type we are going to use when referencing lambda methods.
 
 Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. 
 
-Creating our own functional interfaces is not uncommon, but because all the interfaces defined in `java.utill.function` are generic we should them re-use them as much as possible.
+Creating our own functional interfaces is not uncommon, but because all the interfaces defined in [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) are generic we should them re-use them as much as possible. 
 
 Example:
 
@@ -257,11 +258,11 @@ BiFunction<String, Integer, String> repeatNTimes=
                 (str, times) -> new String(new char[times]).replace("\0", str);
 ```
 
-If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. They "store behavior", "behavior" that can be passed around your code and played with.
+If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. Or at least not that the type we were accustomed to. Rather, they "store behavior", "behavior" that can be passed around your code and played with.
 
 If we want to actually call the "behavior"/"functionality" associated with a Lambda method we just need to invoke the single abstract method that the `@FunctionalInterface` defines.
 
-The only abstract method from the `Function` class is called `apply()`:
+The only abstract method from the `Function<T>` interface is called `apply()`:
 
 ```java
 Function<String, Integer> countVocals = (str) -> str.replaceAll("[^aeiouAEIOU]","").length();
@@ -273,9 +274,28 @@ The only abstract method from the `Predicate` class is called `test()`:
 ```java
 Predicate<String> containsComma = (str) -> str.contains(",");
 boolean hasComma = containsComma.test("ab,c");
-```        
+```
 
-#### A lambda returning a lambda 
+It's also important to note that a `@FunctionalInterface` cand have as many `default` methods as necesarry. There's no limit on that.
+
+For example the `Function<T>` interface has three additional `default` methods: `andThen()`, `compose()` and `identity()`. 
+
+Those methods can be used for function composition. They are quite helfpul if we want to chain a series of lambdas:
+
+```java
+Function<String, String> putInBrackets = (s) -> "[" + s + "]";
+Function<String, String> putInQuotes = (s) -> "\"" + s + "\"";
+
+// Equivalent to putInQuotes(putInBrackets("ABC"))
+String s1 = putInBrackets.andThen(putInQuotes).apply("ABC");
+System.out.println(s1); // Output: "[ABC]"
+
+// Equivalent to putInBrackets(putInQuotes("ABC"))
+String s2 = putInBrackets.compose(putInQuotes).apply("ABC");
+System.out.println(s2); // Output: ["ABC"]
+```
+
+#### Example: A lambda returning a lambda 
 
 To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
 
@@ -295,7 +315,7 @@ System.out.println(add3.apply(1)); // result: 4
 System.out.prinltn(add5.apply(3)); // result: 8
 ```
 
-#### Writing our own forEach method
+#### Example: Writing our own forEach method using lambdas
 
 The purpose of this exercise is to write our own `forEach` method:
 * Traverse the `Iterable` collection;
