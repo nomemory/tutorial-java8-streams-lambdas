@@ -12,11 +12,13 @@ Before jumping into conclusions and start bragging about how Streams and Lambdas
 
 Also it's important to have in mind that the more "functional" you write your code small performance penalties will be inherent. It's quite contextual, but in most of the cases using a classic `for loop` instead of adding the small overhead of the Streams API will be more efficient.
 
-Using Lambdas and Streams is not about gaining small performance advantages in terms of CPU or memory utilisation (it's the other way around), but about writing code that is more *short*, *readable*, *concise* and easier to debug.
+Using Lambdas and Streams is not about gaining small performance advantages in terms of CPU or memory utilisation (it's the other way around), but about writing code that is more *short*, *readable*, *concise* and *easier to debug*. 
 
-Let's begin by doing some code-work. 
+Let's begin by doing something we enjoy: write code and solve an exercise.
 
-We will write a simple method that takes a `List<Employee>` as input and then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. The `key` represents the department, while the `value` is a `List<>` of every employee that works in that deprtament. 
+We will write a simple method that takes a `List<Employee>` as input, then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. 
+
+The `key` represents the department, while the `value` is a `List<>` of every employee that works in that deprtament. 
 
 For reference the `Employee` might class looks like:
 
@@ -33,7 +35,7 @@ public class Employee {
 }
 ```
 
-Without using any of the Streams API we can write something like this (`putIfAbsent` method was also introduced in Java 8):
+Without using any of the Streams API we can write something like this:
 
 ```java
 public static Map<String, List<Employee>> groupByDepartments(List<Employee> employees) {
@@ -49,7 +51,7 @@ public static Map<String, List<Employee>> groupByDepartments(List<Employee> empl
 
 This doesn't look too bad, and the code is quite straight-forward. We can live with that. At least we did.
 
-But what if tell you `groupingBy` is a thing that is "built-in" in the Stream API and everything becomes a one-liner (that's not even hackish and with a stretch is as readble as plain English):
+But what if tell you `groupingBy` is a thing that is "built-in" in the Stream API and everything becomes a one-liner:
 
 ```java
 public static Map<String, List<Employee>> groupByDepartmentsF(List<Employee> employees) {
@@ -57,7 +59,9 @@ public static Map<String, List<Employee>> groupByDepartmentsF(List<Employee> emp
 }
 ```
 
-Now we want to go even further with our exercise. The new requirement is to write a method that takes a `List<Employee>` and returns a `Map<String, Long>` describing how many employees each departments has. The `key` will represent the Department, while the `value` will represent the number of employees working in that department.
+Now we want to go even further with our exercise. 
+
+The new requirement is to write a method that takes a `List<Employee>` and returns a `Map<String, Long>` describing how many employees each departments has. The `key` will represent the Department, while the `value` will represent the number of employees working in that department.
 
 ```
 {Customer Service=67, Staffing=61, Licenses=58, Financial=65, ...}
@@ -180,11 +184,11 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 * :white_check_mark: `() ->  { String s = “abc” ; return s + s; }` →
 
-*This is a valid lambda that returns the string:* `"abcabc"`.
+*This is a valid lambda that returns the string:* `"abcabc"`.*
 
 * :white_check_mark: `(List<String> list) -> list.isEmpty()`
 
-*This is valid lambda. In most of the cases there's no need to specify the type of the input parameters, as the type is inferred from the context. 
+*This is valid lambda. In most of the cases there's no need to specify the type of the input parameters, as the type is inferred from the context.*
 
 * :white_check_mark: `() -> new Apple(10)`
 
