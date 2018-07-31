@@ -4,12 +4,19 @@
 
 **half-life-3-confirmed**
 
+<sup>This tutorial assumes the reader has a good grasp of the Java Programming language features: Interfaces, Anonymous Classes, Collectins API, etc.</sup>
+
 ## Introduction
 
+Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our developers problems let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
 
-Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all our problems let's start by ... doing some code-work. 
+Also it's important to have in mind that the more "functional" you write your code small performance penalties will be inherent. It's quite contextual, but in most of the cases using a classic `for loop` instead of adding the small overhead of the Streams API will be more efficient.
 
-We will write a simple method that takes a `List<Employee>` as input and then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. 
+Using Lambdas and Streams is not about gaining small performance advantages in terms of CPU or memory utilisation (it's the other way around), but about writing code that is more *short*, *readable*, *concise* and easier to debug.
+
+Let's begin by doing some code-work. 
+
+We will write a simple method that takes a `List<Employee>` as input and then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. The `key` represents the department, while the `value` is a `List<>` of every employee that works in that deprtament. 
 
 For reference the `Employee` might class looks like:
 
@@ -26,12 +33,13 @@ public class Employee {
 }
 ```
 
-Normally in the Java versions prior to Java 8 we would do something like:
+Without using any of the Streams API we can write something like this (`putIfAbsent` method was also introduced in Java 8):
 
 ```java
 public static Map<String, List<Employee>> groupByDepartments(List<Employee> employees) {
     Map<String, List<Employee>> result = new HashMap<>();
     for(Employee employee : employees) {
+        // If it's the first time we encounter the department we initialize the List<Employee>
         result.putIfAbsent(employee.getDepartment(), new LinkedList<>());
         result.get(employee.getDepartment()).add(employee);
     }
@@ -41,16 +49,15 @@ public static Map<String, List<Employee>> groupByDepartments(List<Employee> empl
 
 This doesn't look too bad, and the code is quite straight-forward. We can live with that. At least we did.
 
-But what if tell you `groupingBy` is a thing that is "built-in" in the Stream API and everything becomes:
+But what if tell you `groupingBy` is a thing that is "built-in" in the Stream API and everything becomes a one-liner (that's not even hackish and with a stretch is as readble as plain English):
 
 ```java
 public static Map<String, List<Employee>> groupByDepartmentsF(List<Employee> employees) {
-    return employees.stream()
-                    .collect(groupingBy(Employee::getDepartment)); // Employee:getDepartment is a lambda
+    return employees.stream().collect(groupingBy(Employee::getDepartment)); // Employee:getDepartment is a lambda
 }
 ```
 
-Now we want to go even further with our exercise. The new requirement is to write a method that takes a `List<Employee>` and returns a `Map<String, Long>` describing how many employees each departments has.
+Now we want to go even further with our exercise. The new requirement is to write a method that takes a `List<Employee>` and returns a `Map<String, Long>` describing how many employees each departments has. The `key` will represent the Department, while the `value` will represent the number of employees working in that department.
 
 ```
 {Customer Service=67, Staffing=61, Licenses=58, Financial=65, ...}
@@ -68,8 +75,6 @@ public static Map<String, Long> groupAndCountDepartments(List<Employee> employee
 
 Is the code more concise and readable ? Let's be honest to ourselves, it isn't very readable if this is the first interaction with those "weird concepts and syntax", but after a short initial investment the benefits will become more and more obvious.
 
-Lambda expressions can be considered an elegant way of "storing" and referencing behavior, while Streams API comes with a with functionality similar to SQL but much more powerful when it comes to using/re-using the behavior we are encapsulating in lambda expressions. 
-
 
 ## Lambdas
 
@@ -81,17 +86,17 @@ Lambda expressions can be considered an elegant way of "storing" and referencing
 
 Lambda is also a **concise** representation of an **anonymous** **function** that can be **passed around**.
 * concise → no need to write boilerplate code (remember *Anonymous Classes...*);
-* anonymous → the lambda doesn’t have a name;
+* anonymous → the lambda doesn’t have a name like methods have;
 * function → just like a function it has a body, a return type, and list of parameters;
 * passed around → the lambda can be passed as parameter or referenced by a variable.
 
 **Bad News**:
-* Lambdas technically don't let you do anything that you couldn't do prior to Java 8. 
+* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. In a way lambdas are nothing more than syntactic sugar. 
 
 **Good news**:
 * You are no longer required to write long and tedious declarations (remember *Anonymous Classes...*). 
 
-For example in order to sort the employees by their salary we are no longer to write a `Comparator<Employee>` using an anonymous class:
+For example in order to sort the a `List<Employees` by their salary we are no longer required to write a `Comparator<Employee>` using an anonymous class:
 
 ```java
 // Anonymous Class Example
@@ -106,13 +111,22 @@ Comparator<Employee> bySalary = new Comparator<Employee>() {
 Collections.sort(employees, bySalary);
 ```
 
-We can use a lambda instead:
+We can use a lambdas instead:
 
 ```java
 // Lambda Example
 // Don't forget to null check
+
 Comparator<Employee> bySalary = (e1, e2) -> e1.getSalary().compareTo(e2.getSalary());
 Collections.sort(employees, bySalary);
+
+//OR
+
+Collections.sort(employees, (e1, e2) -> e1.getSalary().compareTo(e2.getSalary());
+
+// OR
+
+Collections.sort(employees, Comparator.comparing(Employee::getSalary));
 ```
 
 For creating something as simple as a `Runnable` we will never have to write:
@@ -140,9 +154,9 @@ runnable2.run();
 
 As you can see in the previous examples the structure of a Lambda is as follows:
 
-`(Param1, Param2, ..., ParamN) -> { /* do something ||&& return something */}`
+`(Param1, Param2, ..., ParamN) -> { /* do something ||&& return something */ }`
 
-Writing lambda expressions involes some few basic rules:
+Writing lambda expressions involes some few basic rules. Skim through the next examples:
 
 * :white_check_mark: `() -> {}` →
 
@@ -166,9 +180,11 @@ Writing lambda expressions involes some few basic rules:
 
 * :white_check_mark: `() ->  { String s = “abc” ; return s + s; }` →
 
-*This is valid lambda that returns the string:* `"abcabc"`.
+*This is a valid lambda that returns the string:* `"abcabc"`.
 
 * :white_check_mark: `(List<String> list) -> list.isEmpty()`
+
+*This is valid lambda. In most of the cases there's no need to specify the type of the input parameters, as the type is inferred from the context. 
 
 * :white_check_mark: `() -> new Apple(10)`
 
@@ -179,13 +195,13 @@ Writing lambda expressions involes some few basic rules:
 
 ### `@FunctionalInterface`
 
+**Q** :question: So lambdas are those small anonymous functions! But how and where do we use them ?
 
-| | |
-| ----- | ----- |
-| *Question* | So lambdas are those small anonymous functions! But how and where do we use them ? |
-| *Answer* | We just pass them around. Lambdas can be parameters for functions, constructors and they can be kept in variables! |
-| *Question* | Oh wait, Java is strongly typed. Is “Lambda” a new type ?  |
-| *Answer* | Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**. |
+ * We just pass them around. Lambdas can be parameters for functions, constructors and they can be kept in variables! |
+ 
+**Q** :question: Oh wait, Java is strongly typed. Is “Lambda” a new type ?
+
+* Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**.
 
 To be more clear, **Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`.
 
@@ -194,6 +210,7 @@ The most obvious examples from the Java API are:
 ```java
 @FunctionalInterface
 public interface Comparator<T> {
+    // The one and only abstract method from the interface
 	int compare(T o1, T o2);
 }
 ...
@@ -204,6 +221,7 @@ Or:
 ```java
 @FunctionalInterface
 public interface Runnable {
+    // The one and only abstract method from the interface
 	void run();
 }
 ...
@@ -236,6 +254,22 @@ BiFunction<String, Integer, String> repeatNTimes=
 ```
 
 If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. They "store behavior", "behavior" that can be passed around your code and played with.
+
+If we want to actually call the "behavior"/"functionality" associated with a Lambda method we just need to invoke the single abstract method that the `@FunctionalInterface` defines.
+
+The only abstract method from the `Function` class is called `apply()`:
+
+```java
+Function<String, Integer> countVocals = (str) -> str.replaceAll("[^aeiouAEIOU]","").length();
+int numVocals = countVocals.apply("ABC");
+```
+
+The only abstract method from the `Predicate` class is called `test()`:
+
+```java
+Predicate<String> containsComma = (str) -> str.contains(",");
+boolean hasComma = containsComma.test("ab,c");
+```        
 
 #### A lambda returning a lambda 
 
