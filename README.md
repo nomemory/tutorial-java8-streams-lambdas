@@ -16,7 +16,7 @@ Using Lambdas and Streams is not about gaining small performance advantages in t
 
 // rant off 
 
-Let's begin by doing something we enjoy: write code and solve an exercise.
+To prove my points let's begin by doing something we enjoy: write code and solve an exercise.
 
 We will write a simple method that takes a `List<Employee>` as input, then groups every employee by his/her department, resulting in a `Map<String, List<Employee>>`. 
 
@@ -94,7 +94,7 @@ Is the code more concise and readable ? Let's be honest to ourselves, it isn't v
 
 <sub>Before *jumping into the Stream*</sub>
 
-<sup>Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet... Also a mandatory concept to understand before jumping into Streams.</sup>
+<sup>Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet...</sup>
 
 Lambda is also a **concise** representation of an **anonymous** **function** that can be **passed around**.
 * concise → no need to write boilerplate code (remember *Anonymous Classes...*);
@@ -214,9 +214,11 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 * Well… no. For now, it suffices to understand that a lambda expression can be assigned to a variable or passed to a method expecting a functional interface as argument, provided the lambda expression has the same signature as the abstract method of the **Functional Interface**.
 
-To be more clear, **Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`.
+To be more clear, **Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`. 
 
-The most obvious examples from the Java API are:
+(Note: This annotation is not mandatory, but it's useful for compile-time checks. Basically if we don't respect the "one abstract method rule" and `@FunctionalInterface` was used, the code won't compile. Use it with trust: it will make your code more readable, and it will protect the codebase by not allowing "rogue" developers to add more abstract methods).
+
+The most obvious examples of `@FunctionalInterface`s from the Java API are:
 
 ```java
 @FunctionalInterface
@@ -241,33 +243,74 @@ public interface Runnable {
 ...
 ```
 
-The [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`. Those interfaces represent the type we are going to use when referencing lambda methods.
+Actually there's more than that. The [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`. Those interfaces represent the type we are going to use when referencing lambda methods.
 
 Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain exactly one abstract method. 
 
 Creating our own functional interfaces is not uncommon, but because all the interfaces defined in [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) are generic we should them re-use them as much as possible. 
 
-Example:
+Examples:
 
 ```java
-// (T) -> return Boolean;
-Predicate<String> containsComma = (str) -> str.contains(",");
 
+// References a method that:
+// - Has one input parameter (T)
+// - Returns void
+// 
 // (T) -> void
 Consumer<String> printUpperCase = (str) -> str.toLowerCase();
 
+// References a method that:
+// - Has one input parameter (T)
+// - Returns a value (R) (R and T can be identifical)
+// 
 // (T1) -> return (T2);
-// Magic method to count the vocals
 Function<String, Integer> countVocals =
                 (str) -> str.replaceAll("[^aeiouAEIOU]","").length();
 
-// (T1, T2) -> return (T3);
-// Magic-method to repeat a String. 
+// References a method that:
+// - Has one input parameter (T)
+// - Returns a Boolean
+// 
+// (T) -> return Boolean;
+Predicate<String> containsComma = (str) -> str.contains(",");
+
+// References a method that:
+// - Has no input parameters
+// - Returns a value (R)
+//
+// () -> R
+Supplier<Double> randomSupplier = () -> Math.random();
+
+
+// Reference a method that:
+// - Has two input parameters (T1, T2)
+// - Returns void
+//
+// (T1, T2) -> void
+BiConsumer<Integer, Integer> printSum = 
+    (i1, i2) -> { 
+        System.out.printf("%d+%d=%d", i1, i2, i1+i2); 
+    };
+
+// References a method that:
+// - Has two input parameters: (T1) and (T2);
+// - Returns a value (R)
+//
+// (T1, T2) -> return (R);
 BiFunction<String, Integer, String> repeatNTimes=
                 (str, times) -> new String(new char[times]).replace("\0", str);
+
+                
+// References a method that:
+// - Has two input parameters (T1) and (T2)
+// - Returns a boolean value
+//
+// (T1, T2) -> Boolean
+BiPredicate<Integer, Integer> biggerThan = (i1, i2) -> (i1 > i2);
 ```
 
-If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all "variables", but they are no longer used to store data. Or at least not that the type of data we were accustomed to. Rather, they "store behavior", "behavior" that can be passed around your code and played with.
+If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes`, etc are all "variables", but they are no longer used to store data. Or at least not that the type of data we were accustomed to. Rather, they "store behavior", "behavior" that can be passed around your code and played with.
 
 If we want to actually call the "behavior"/"functionality" associated with a Lambda method we just need to invoke the single abstract method that the `@FunctionalInterface` defines.
 
@@ -285,9 +328,7 @@ Predicate<String> containsComma = (str) -> str.contains(",");
 boolean hasComma = containsComma.test("ab,c");
 ```
 
-It's also important to note that a `@FunctionalInterface` cand have as many `default` methods as necesarry. There's no limit on that.
-
-For example the `Function<T>` interface has three additional `default` methods: `andThen()`, `compose()` and `identity()`. 
+It's also important to note that a `@FunctionalInterface` cand have as many `default` methods as necesarry. There's no limit on that. For example the `Function<T>` interface has three additional `default` methods: `andThen()`, `compose()` and `identity()`. 
 
 Those methods can be used for function composition. They are quite helfpul if we want to chain a series of lambdas:
 
@@ -324,8 +365,9 @@ Instead of writing a lambda that uses the `compareToIgnoreCase()` explicitily we
 Arrays.sort(stringArray, String::compareToIgnoreCase);
 ```
 
-In the above example `s1` will become the object on which we call the method `String::compareToIgnoreCase`, while `s2` represents the the input parameter of the method. The nice part is we don't have to explicitily write them.  
 
+
+In the above example `s1` will become the object on which we call the method `String::compareToIgnoreCase`, while `s2` represents the the input parameter of the method. The nice part is we don't have to explicitily write them.  
 
 #### Example: A lambda returning a lambda 
 
