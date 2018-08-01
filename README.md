@@ -8,11 +8,13 @@
 
 ## Introduction
 
-Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our developers problems let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
+Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our developers problems, let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
 
-Also it's important to have in mind that the more "functional" you write your code small performance penalties will be inherent. It's quite contextual, but in most of the cases using a classic `for loop` instead of adding the small overhead of the Streams API will be more efficient.
+Another important aspect is that you shouldn't jump directly into (re)writing everything in a "functional" style, just because it's "nice". Streams and Lambdas are an important additional to the Java language, but they are adding a little bit of overhead (actually depending on the context, it can be more than *a bit*). For example, a classic `for` loop will be more efficient than using a `Stream` to iterate over an array. And no matter how the JVM will evolve in the future, things will probably remain this way.
 
-Using Lambdas and Streams is not about gaining small performance advantages in terms of CPU or memory utilisation (it's the other way around), but about writing code that is more *short*, *readable*, *concise* and *easier to debug*. 
+Using Lambdas and Streams is not about gaining small performance advantages in terms of CPU or memory utilisation (actually they induce *penalties*), but about writing code that is more *short*, *readable*, *concise* and *easier to debug*. If performance is important, please don't replace every `for` with [`IntStream.range()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html#range-int-int-) just because it's *hip*. 
+
+// rant off 
 
 Let's begin by doing something we enjoy: write code and solve an exercise.
 
@@ -23,6 +25,8 @@ The `key` represents the department, while the `value` is a `List<>` of every em
 For reference the `Employee` might class looks like:
 
 ```java
+// If this your first time you those annotations
+// Please check: `Project Lombok`
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,6 +46,7 @@ public static Map<String, List<Employee>> groupByDepartments(List<Employee> empl
     Map<String, List<Employee>> result = new HashMap<>();
     for(Employee employee : employees) {
         // If it's the first time we encounter the department we initialize the List<Employee>
+        // Note: `putIfAbsent` method was also introduced in Java 8
         result.putIfAbsent(employee.getDepartment(), new LinkedList<>());
         result.get(employee.getDepartment()).add(employee);
     }
@@ -59,11 +64,14 @@ public static Map<String, List<Employee>> groupByDepartmentsF(List<Employee> emp
 }
 ```
 
-Now we want to go even further with our exercise. 
+Normally I don't recommend people on using "condensed" one-liners, but in this case it's almost like reading *English*. The code speaks by itself. 
 
-The new requirement is to write a method that takes a `List<Employee>` and returns a `Map<String, Long>` describing how many employees each departments has. The `key` will represent the Department, while the `value` will represent the number of employees working in that department.
+Let's make things more "difficult".
+
+The new requirement is to write a method that takes a `List<Employee>` and returns a `Map<String, Long>` counting how many employees each departments has. The `key` will represent the Department, while the `value` will represent the number of employees working in that department.
 
 ```
+// The map will look like this:
 {Customer Service=67, Staffing=61, Licenses=58, Financial=65, ...}
 ```
 
@@ -84,6 +92,7 @@ Is the code more concise and readable ? Let's be honest to ourselves, it isn't v
 
 ### What is Lambda ?
 
+<sub>Before *jumping into the Stream*</sub>
 
 <sup>Lambda, Λ, λ (uppercase Λ, lowercase λ) is the 11th letter of the Greek alphabet... Also a mandatory concept to understand before jumping into Streams.</sup>
 
@@ -94,10 +103,10 @@ Lambda is also a **concise** representation of an **anonymous** **function** tha
 * passed around → the lambda can be passed as parameter or referenced by a variable.
 
 **Bad News**:
-* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. For the eye of the programmer lambdas can be seen as "syntactic" sugar for anonymous inner classes (even if they are implemented differently and they generate different instructions after compilation).  
+* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. For the eye of the programmer lambdas can be seen as "syntactic" sugar for anonymous inner classes. Internally (from the JVM point of view) they behave differently, but for the sake of simplicity consider them anonynous inner classes.
 
 **Good news**:
-* You are no longer required to write long and tedious declarations (remember *Anonymous Classes...*). 
+* You are no longer required to write long and tedious declarations. Shorter code ceremony, same features.
 
 For example in order to sort the a `List<Employees` by their salary we are no longer required to write a `Comparator<Employee>` using an anonymous class:
 
@@ -182,9 +191,9 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 * :white_check_mark: `() ->  { String s = “abc” ; return s + s; }` →
 
-*This is a valid lambda that (always) returns the string:* `"abcabc"`.*
+*This is a valid lambda that (always) returns the string:* `"abcabc"`.* 
 
-* :white_check_mark: `(List<String> list) -> list.isEmpty()`
+* :white_check_mark: `(List<String> list) -> list.isEmpty()` →
 
 *This is valid lambda. In most of the cases there's no need to specify the type of the input parameters, as the type is inferred from the context. You could've ommited the types by simply writing: `(list) -> list.isEmpty`*
 
@@ -234,7 +243,7 @@ public interface Runnable {
 
 The [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) package is nice enough to define Functional Interfaces for us so we can easily juggle with the lambdas in our code. The most important ones are `Predicate<T>`, `Function<T1, T2>`, `Consumer<T>`, `Supplier<T>` and `BiFunction<T1, T2, T3>`. Those interfaces represent the type we are going to use when referencing lambda methods.
 
-Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain only abstract method. 
+Nobody restricts us to define our own `@FunctionalInterface`s as long as we keep in mind that they need to contain exactly one abstract method. 
 
 Creating our own functional interfaces is not uncommon, but because all the interfaces defined in [`java.utill.function`](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html) are generic we should them re-use them as much as possible. 
 
@@ -258,7 +267,7 @@ BiFunction<String, Integer, String> repeatNTimes=
                 (str, times) -> new String(new char[times]).replace("\0", str);
 ```
 
-If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all variables, but they are no longer used to store data. Or at least not that the type we were accustomed to. Rather, they "store behavior", "behavior" that can be passed around your code and played with.
+If you look closer at the example everything should start making sense now. `containsComma`, `printUpperCase`, `countVocals`, `repeatNTimes` are all "variables", but they are no longer used to store data. Or at least not that the type of data we were accustomed to. Rather, they "store behavior", "behavior" that can be passed around your code and played with.
 
 If we want to actually call the "behavior"/"functionality" associated with a Lambda method we just need to invoke the single abstract method that the `@FunctionalInterface` defines.
 
