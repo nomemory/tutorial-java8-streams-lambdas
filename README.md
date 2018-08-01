@@ -8,9 +8,11 @@
 
 ## Introduction
 
-Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our developers problems, let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
+Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our dev problems, let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
 
-Another important aspect is that you shouldn't jump directly into (re)writing everything in a "functional" style, just because it's "nice". Streams and Lambdas are an important additional to the Java language, but they are adding a little bit of overhead (actually depending on the context, it can be more than *a bit*). For example, a classic `for` loop will be more efficient than using a `Stream` to iterate over an array. And no matter how the JVM will evolve in the future, things will probably remain this way.
+Another important aspect is that you shouldn't jump directly into (re)writing everything in a "functional" style, just because it's "nice". 
+
+Streams and Lambdas are an important addition to the Java language, but they are adding a little bit of overhead (actually, depending on the context, it can be more than *a bit*). For example, a classic `for` loop will be more efficient than using a `Stream` to iterate over an array. And no matter how the JVM will evolve in the future, things will probably remain this way.
 
 Using Lambdas and Streams is not about gaining small performance advantages in terms of CPU or memory utilisation (actually they induce *penalties*), but about writing code that is more *short*, *readable*, *concise* and *easier to debug*. If performance is important, please don't replace every `for` with [`IntStream.range()`](https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html#range-int-int-) just because it's *hip*. 
 
@@ -103,7 +105,7 @@ Lambda is also a **concise** representation of an **anonymous** **function** tha
 * passed around → the lambda can be passed as parameter or referenced by a variable.
 
 **Bad News**:
-* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. For the eye of the programmer lambdas can be seen as "syntactic" sugar for anonymous inner classes. Internally (from the JVM point of view) they behave differently, but for the sake of simplicity consider them anonynous inner classes.
+* Lambdas technically don't let you do anything that you couldn't do prior to **Java 8**. 
 
 **Good news**:
 * You are no longer required to write long and tedious declarations. Shorter code ceremony, same features.
@@ -379,6 +381,7 @@ public class EmailComposer {
         return (body) -> body + "\n\n" + msg;
     }
 
+    // Chaining functions !! HERE
     public String composeEmail() {
         return prepend(GREETING)
                 .compose(prepend(PLEASANTRY))
@@ -433,6 +436,91 @@ BiPredicate<Object, Object> biPred1 = (o1, o2) -> Objects.deepEquals(o1, o2);
 BiPredicate<Object, Object> biPred2 = Objects::deepEquals;
 ```
 
+### Lambdas and Scope
+
+Important Rule: Lambdas are **not** syntactic sugar for *Anonymous Inner Classes*, even if they seem to be similar. What differentiates the two concepts is the `scope`:
+
+* When we create an Inner Class, we create a new scope. `this` in the context of an inner class is a reference to the newly created instance;
+* When we create a Lambda method, we "inherit" the enclosing scope. `this` in the context of a lambda references the enclosing instance. 
+
+Let's run the following example:
+
+```java
+public class ScopeExperiment {
+
+    private String value = "Enclosing Scope";
+
+    public void experiment() {
+        Runnable rAIC = new Runnable() {
+            private String value = "Local Scope";
+            @Override
+            public void run() {
+                System.out.println(this.getClass().getName());
+                System.out.println(this.value);
+            }
+        };
+        rAIC.run();
+
+        Runnable rLam = () -> {
+            System.out.println(this.getClass().getName());
+            System.out.println(this.value);
+        };
+        rLam.run();
+    }
+
+    public static void main(String[] args) {
+        new ScopeExperiment().experiment();
+    }
+}
+```
+
+As expected the output will be:
+
+```
+net.andreinc.jlands.generic.ScopeExperiment$1
+Local Scope
+net.andreinc.jlands.generic.ScopeExperiment
+Enclosing Scope
+```
+
+Remember that Lambdas don't have their own concept of `this`. All they do is to "inherit" their enclosing scope.
+
+So if we change the signature of the `experiment()` method to `public static void experiment()` the code won't compile, all because of the lambda not being able to reference `this` from the static context.
+
+```java
+// DOES NOT COMPILE
+public static void experiment() {
+    Runnable rAIC = new Runnable() {
+        private String value = "Local Scope";
+        @Override
+        public void run() {
+            System.out.println(this.getClass().getName());
+            System.out.println(this.value);
+        }
+    };
+    rAIC.run();
+
+    Runnable rLam = () -> {
+        System.out.println(this.getClass().getName());
+        System.out.println(this.value);
+    };
+    rLam.run();
+}
+
+// DOES COMPILE
+public static void experiment() {
+    Runnable rAIC = new Runnable() {
+        private String value = "Local Scope";
+        @Override
+        public void run() {
+            System.out.println(this.getClass().getName());
+            System.out.println(this.value);
+        }
+    };
+    rAIC.run();
+}
+```    
+
 #### Example: A lambda returning a lambda 
 
 To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
@@ -455,29 +543,26 @@ System.out.prinltn(add5.apply(3)); // result: 8
 
 #### Example: Writing our own forEach method using lambdas
 
-The purpose of this exercise is to write our own `forEach` method:
-* Traverse the `Iterable` collection;
-* Check if the element passes a certain condition (think `Predicate`);
-* Consums each element of the collection (think `Consumer`).
+The purpose of this exercise is to write our own `forEach()` method. This method will accept as input parameters:
+* An `Iterable<T>` representing the `Collection` over we iterate;
+* A `Predicate<T>` representing the condition we put on the elements of type `<T>` of the `Iterable<T>`;
+* A `BiConsumer<Integer, T>` representing the method that "consumes" the element of type `<T>` that passed the condition imposed by the second input parameter (the `Predicate<T>`). The `Integer` parameter of the `BiConsumer<Integer, T>` represents the current `index` of the collection;
+
+The straightforward implementation can look this:
 
 ```java
-public static void forEach(Iterable<String> iterable, Predicate<String> predicate, Consumer<String> consumer) {
-    for(String s : iterable)
-        if (predicate.test(s)) // The condition is passed down (input parameter)
-            consumer.accept(s); // The behavior is passed down (input parameter)
+public static <T> void forEach(Iterable<T> iterable, Predicate<T> predicate, BiConsumer<Integer, T> consumer) {
+    int i = 0;
+    Iterator<T> iterator = iterable.iterator();
+    while(iterator.hasNext()) {
+        T next = iterator.next();
+        if (predicate.test(next)) {
+                consumer.accept(i, next);
+        }   
+        i++;
+    }
 }
 ```
 
-```java
- List<String> list = new ArrayList<>(Arrays.asList("abc", "det", "delo", "itte"));
-
-// Prints "det", "delo"
-forEach(list, (s) -> s.startsWith("d"), System.out::println);
-
-// Prints "abc", "det", "Delo", "itte"
-Predicate<String> nonEmpty = (String s) -> s != null && s.length()!=0;
-Consumer<String> printItToConsole = System.out::println;
-forEach(list, nonEmpty, printItToConsole);
-```
-
+Now this method is generic enough to iterate over a `List<Integer>` or a `List<String>`:
 
