@@ -330,7 +330,7 @@ boolean hasComma = containsComma.test("ab,c");
 
 It's also important to note that a `@FunctionalInterface` cand have as many `default` methods as necesarry. There's no limit on that. For example the `Function<T>` interface has three additional `default` methods: `andThen()`, `compose()` and `identity()`. 
 
-Those methods can be used for function composition. They are quite helfpul if we want to chain a series of lambdas:
+`compose()` and `andThen()` are methods used for function composition. They are quite helfpul if we want to chain a series of lambdas:
 
 ```java
 Function<String, String> putInBrackets = (s) -> "[" + s + "]";
@@ -345,6 +345,52 @@ System.out.println(s1); // Output: "[ABC]"
 // f(g(x)) <=> (fog)(x)
 String s2 = putInBrackets.compose(putInQuotes).apply("ABC");
 System.out.println(s2); // Output: ["ABC"]
+
+// Notice the difference
+```
+
+Let's go further and imagine ourselves we are building a class `EmailComposer` that compose email. Each email has:
+
+* A greeting: "Dear, ", "Hi, "
+* A pleasantry: "I hope your are well."
+* A body (content) - this represents the actual message;
+* A sign-off: "Best wishes", "Warm Regards".
+
+Our task is to write the `EmailComposer` using `andThem()` and `compose()`. With a little bit of stretch, and only to prove a point, we can come up with the following solution (I am not kidding, you don't have to do it like this):
+
+```java
+public class EmailComposer {
+
+    private static final String GREETING = "Hello,";
+    private static final String PLEASANTRY = "We hope you are well.";
+    private static final String SIGN_OFF = "Warm regards,\nThe team.";
+
+    private String body;
+
+    public EmailComposer(String body) {
+        this.body = body;
+    }
+
+    public static Function<String, String> prepend(String msg) {
+        return (body) -> msg + "\n\n" + body;
+    }
+
+    public static Function<String, String> append(String msg) {
+        return (body) -> body + "\n\n" + msg;
+    }
+
+    public String composeEmail() {
+        return prepend(GREETING)
+                .compose(prepend(PLEASANTRY))
+                .andThen(append(SIGN_OFF))
+                .apply(this.body);
+    }
+
+    public static void main(String[] args) {
+        EmailComposer ec = new EmailComposer("This is a test email.");
+        System.out.println(ec.composeEmail());
+    }
+}
 ```
 
 ### Referencing existing method with lambda using `::` notation
@@ -365,9 +411,7 @@ Instead of writing a lambda that uses the `compareToIgnoreCase()` explicitily we
 Arrays.sort(stringArray, String::compareToIgnoreCase);
 ```
 
-
-
-In the above example `s1` will become the object on which we call the method `String::compareToIgnoreCase`, while `s2` represents the the input parameter of the method. The nice part is we don't have to explicitily write them.  
+In the above example `s1` will become the object on which we call the method `String::compareToIgnoreCase`, while `s2` represents the the input parameter of the method. The nice part is we don't have to explicitily write them.
 
 #### Example: A lambda returning a lambda 
 
