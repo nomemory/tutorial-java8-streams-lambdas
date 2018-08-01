@@ -413,6 +413,26 @@ Arrays.sort(stringArray, String::compareToIgnoreCase);
 
 In the above example `s1` will become the object on which we call the method `String::compareToIgnoreCase`, while `s2` represents the the input parameter of the method. The nice part is we don't have to explicitily write them.
 
+Other examples:
+
+```java
+Consumer<String> print1 = (str) -> System.out.println(str);
+// Is Equivalent to
+Consumer<String> print2 = System.out::println;
+
+// OR
+
+BiFunction<String, String, String> concater1 = (source, str) -> source.concat(str);
+// Is Equivalent to
+BiFunction<String, String, String> concater2 = String::concat;
+
+// OR
+
+BiPredicate<Object, Object> biPred1 = (o1, o2) -> Objects.deepEquals(o1, o2);
+// Is Equivalent to
+BiPredicate<Object, Object> biPred2 = Objects::deepEquals;
+```
+
 #### Example: A lambda returning a lambda 
 
 To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
