@@ -216,7 +216,7 @@ Writing lambda expressions involes some few basic rules. Skim through the next e
 
 To be more clear, **Functional Interface**s are interfaces that specify exactly one abstract method and can be marked with the `@FunctionalInterface`. 
 
-(Note: This annotation is not mandatory, but it's useful for compile-time checks. Basically if we don't respect the "one abstract method rule" and `@FunctionalInterface` was used, the code won't compile. Use it with trust: it will make your code more readable, and it will protect the codebase by not allowing "rogue" developers to add more abstract methods).
+<sup>(Note: This annotation is not mandatory, but it's useful for compile-time checks. Basically if we don't respect the "one abstract method rule" and `@FunctionalInterface` was used, the code won't compile. Use it with trust: it will make your code more readable, and it will protect the codebase by not allowing "rogue" developers to add more abstract methods to your functional interfaces).</sup>
 
 The most obvious examples of `@FunctionalInterface`s from the Java API are:
 
