@@ -436,12 +436,27 @@ BiPredicate<Object, Object> biPred1 = (o1, o2) -> Objects.deepEquals(o1, o2);
 BiPredicate<Object, Object> biPred2 = Objects::deepEquals;
 ```
 
+Constructors can be referenced just as well:
+
+```java
+Function<String, StringBuilder> sbCreate1 = (str) -> new StringBuilder(str);
+// Is Equivalent to
+Function<String, StringBuilder> sbCreate2 = StringBuilder::new;
+
+// OR
+
+Supplier<StringBuilder> sbNaCreate1 = () -> new StringBuilder();
+// Is Equivalent to
+Supplier<StringBuilder> sbNaCreate2 = StringBuilder::new;
+```
+
 ### Lambdas and Scope
 
-Important Rule: Lambdas are **not** syntactic sugar for *Anonymous Inner Classes*, even if they seem to be similar. What differentiates the two concepts is the `scope`:
+Important Rule: Lambdas are **not** syntactic sugar for *Anonymous Inner Classes*, even if they seem to be similar. What differentiates the two is how `scope` works:
 
 * When we create an Inner Class, we create a new scope. `this` in the context of an inner class is a reference to the newly created instance;
-* When we create a Lambda method, we "inherit" the enclosing scope. `this` in the context of a lambda references the enclosing instance. 
+
+* When we create a Lambda method, we "inherit" the enclosing scope. `this` in the context of a lambda references the enclosing instance.
 
 Let's run the following example:
 
@@ -474,7 +489,7 @@ public class ScopeExperiment {
 }
 ```
 
-As expected the output will be:
+The output will be:
 
 ```
 net.andreinc.jlands.generic.ScopeExperiment$1
@@ -485,7 +500,7 @@ Enclosing Scope
 
 Remember that Lambdas don't have their own concept of `this`. All they do is to "inherit" their enclosing scope.
 
-So if we change the signature of the `experiment()` method to `public static void experiment()` the code won't compile, all because of the lambda not being able to reference `this` from the static context.
+So if we change the signature of the `experiment()` method to `public static void experiment()` the code won't compile, all because of the lambda not being able to reference `this` from the static context. This doesn't affect inner classes:
 
 ```java
 // DOES NOT COMPILE
@@ -519,11 +534,13 @@ public static void experiment() {
     };
     rAIC.run();
 }
-```    
+```
 
-#### Example: A lambda returning a lambda 
+PS: Java IDEs now auto-suggest the replacement of every anonymous inner class with lambda expressions. Be careful when doing that, especially on well-established code bases - they are not the same!
 
-To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
+#### Example: A lambda returning a lambda (Currying)
+
+To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. That's called **currying**. 
 
 Check the following example:
 ```java
@@ -539,6 +556,57 @@ Function<Integer, Integer> add5 = createAdder.apply(5);
 // Use the methods
 System.out.println(add3.apply(1)); // result: 4
 System.out.prinltn(add5.apply(3)); // result: 8
+```
+
+Or the following example:
+
+```java
+String template = "Hello %s,\n\nWelcome back.\n\nBest regards,\n%s\n\n";
+Function<String, Function<String, String>> createEmail = (from) -> (to) -> format(template, to, from);
+
+Function<String, String> fromMike = createEmail.apply("Mike");
+Function<String, String> fromMat = createEmail.apply("Mat");
+
+System.out.println(fromMike.apply("Tom"));
+System.out.println(fromMike.apply("Deb"));
+System.out.println(fromMat.apply("Mike"));
+
+System.out.println(createEmail.apply("Vic").apply("Nick"));
+```            
+
+With the output:
+
+```
+Hello Tom,
+
+Welcome back.
+
+Best regards,
+Mike
+
+
+Hello Deb,
+
+Welcome back.
+
+Best regards,
+Mike
+
+
+Hello Mike,
+
+Welcome back.
+
+Best regards,
+Mat
+
+
+Hello Nick,
+
+Welcome back.
+
+Best regards,
+Vic
 ```
 
 #### Example: Writing our own forEach method using lambdas
