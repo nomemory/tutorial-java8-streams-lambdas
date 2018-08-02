@@ -634,3 +634,20 @@ public static <T> void forEach(Iterable<T> iterable, Predicate<T> predicate, BiC
 
 Now this method is generic enough to iterate over a `List<Integer>` or a `List<String>`:
 
+```java
+ List<Integer> integers = Arrays.asList(100, 50, 200, 300, 70, 30, 20, 500);
+
+// Using the forEach() method we iterate over list and print only the elements bigger than 100 and their index
+forEach(integers, (el) -> el > 100, (i, el) -> {
+    System.out.printf("integers[%d]=%d\n", i, el);
+});
+
+// OR
+
+
+List<String> strings = Arrays.asList("Tom", "Kim", "Deb", "Mike", "Tony", "Tim");
+
+// Using the forEach() we print only the names that have exactly three letters and print them (ignoring the index)
+forEach(strings, (el) -> el.length() == 3, (i, el) -> System.out.println(el));
+```
+
