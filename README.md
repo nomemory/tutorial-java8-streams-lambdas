@@ -515,6 +515,8 @@ public static void experiment() {
     };
     rAIC.run();
 
+    // Because we are in a static context there's no reference to 
+    // this in the enclosing scope - code won't compile
     Runnable rLam = () -> {
         System.out.println(this.getClass().getName());
         System.out.println(this.value);
@@ -523,6 +525,7 @@ public static void experiment() {
 }
 
 // DOES COMPILE
+// The Abstract Inner Class has it's "own this"
 public static void experiment() {
     Runnable rAIC = new Runnable() {
         private String value = "Local Scope";
@@ -536,9 +539,9 @@ public static void experiment() {
 }
 ```
 
-PS: Java IDEs now auto-suggest the replacement of every anonymous inner class with lambda expressions. Be careful when doing that, especially on well-established code bases - they are not the same!
+PS: Careful with this subtle difference!
 
-#### Partial Function Application and Currying
+#### Partial Function Application
 
 To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
 
@@ -576,6 +579,10 @@ String mikeCorp = corpEmailGen.apply("mike"); // Output: mike@corp.net
 String lukeCorp = corpEmailGen.apply("luke"); // Output: luke@corp.net
 ```
 
+### Currying
+
+Currying is a technique of translating the evaluation o a function that takes multiple arguments into evaluating a sequence of functions, each with **a single argument**.
+
 Check the following example:
 ```java
 // Defines a lambda that returns partially initialized lambdas
@@ -592,7 +599,6 @@ System.out.println(add3.apply(1)); // result: 4
 System.out.prinltn(add5.apply(3)); // result: 8
 ```
 
-Or the following example:
 
 ```java
 String template = "Hello %s,\n\nWelcome back.\n\nBest regards,\n%s\n\n";
