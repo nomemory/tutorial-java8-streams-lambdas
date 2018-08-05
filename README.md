@@ -538,9 +538,43 @@ public static void experiment() {
 
 PS: Java IDEs now auto-suggest the replacement of every anonymous inner class with lambda expressions. Be careful when doing that, especially on well-established code bases - they are not the same!
 
-#### Example: A lambda returning a lambda (Currying)
+#### Partial Function Application and Currying
 
-To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. That's called **currying**. 
+To makes thing even more complicated we can have lambdas generating other lambdas by partially initializing them. 
+
+Basically we can "translate" a lambda `g(x, y, z)` into a new lambda `f(y, z)` by binding `x` to a supplied value, so that `f(y,z)` is equivalent to `g(fixed_value, y, z)`. 
+
+Partial Function Application refers to the process of fixing a number of arguments to a function, producing a new function with a smaller arity (*the number of arguments expected by a function*).
+
+Let's define our own custom `@FunctionInterface` called `F3`:
+
+```java
+@FunctionalInterface
+interface F3<T1, T2, T3, R> {
+    R apply(T1 x, T2 y, T3 z);
+}
+```
+
+`F3` is a function that accepts 3 parameters (`T1`, `T2`, `T3`) and returns a value, `R`. I find it perfect to reference an email generator:
+
+```java
+ F3 <String, String, String, String> emailGen =
+                (name, company, domain) ->
+                        name + "@" + company + "." + domain;
+
+String luke = emailGen.apply("luke", "gmail", "com");
+System.out.println(luke); // Output: luke@gmail.com
+```
+
+But if we want to generate only emails for a certain corporation (`"corp.net"`) we can partially intialize our initial `emailGen`erator by binding values to (`company`=`"corp"`) and (`domain`=`"net"`):
+
+At this point `emailGen(name, company, domain)` becomes `corpEmailGen(name)`, a new lambda with reduced arity compared to the initial one:
+
+```java
+Function<String, String> corpEmailGen = (x) -> emailGen.apply(x, "corp", "net");
+String mikeCorp = corpEmailGen.apply("mike"); // Output: mike@corp.net
+String lukeCorp = corpEmailGen.apply("luke"); // Output: luke@corp.net
+```
 
 Check the following example:
 ```java
@@ -608,6 +642,8 @@ Welcome back.
 Best regards,
 Vic
 ```
+
+
 
 #### Example: Writing our own forEach method using lambdas
 
