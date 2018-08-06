@@ -574,122 +574,121 @@ But if we want to generate only emails for a certain corporation (`"corp.net"`) 
 At this point `emailGen(name, company, domain)` becomes `corpEmailGen(name)`, a new lambda with reduced arity compared to the initial one:
 
 ```java
-Function<String, String> corpEmailGen = (x) -> emailGen.apply(x, "corp", "net");
+
+// We use the initial lambda `emailGen` to generate a new lambda `corpEmailGen` by partially initializing the function.
+Function<String, String> corpEmailGen = (name) -> emailGen.apply(name, /* company= */ "corp", /* domain= */ "net");
+
 String mikeCorp = corpEmailGen.apply("mike"); // Output: mike@corp.net
 String lukeCorp = corpEmailGen.apply("luke"); // Output: luke@corp.net
 ```
+
+
 
 ### Currying
 
 Currying is a technique of translating the evaluation o a function that takes multiple arguments into evaluating a sequence of functions, each with **a single argument**.
 
-Check the following example:
-```java
-// Defines a lambda that returns partially initialized lambdas
-Function<Integer, Function<Integer, Integer>> createAdder = (adder) -> 
-                                                                (number) -> number + adder;
+Currying can be seen as type of partial function application, they are related but certainly not the same. The biggest differences that curried functions return at every step another method with smaller arity that the previous one, while partially applied functions returnt the value instantly.
 
-// Creates a function that adds 3 to a number
-Function<Integer, Integer> add3 = createAdder.apply(3);
-// Creates a function that adds 5 to a number                                                                 
-Function<Integer, Integer> add5 = createAdder.apply(5);
-
-// Use the methods
-System.out.println(add3.apply(1)); // result: 4
-System.out.prinltn(add5.apply(3)); // result: 8
-```
-
+For example, to build the `emailGen` from the previous example we won't need to define our own `@FunctionalInterface`, but rather we can use the following pattern:
 
 ```java
-String template = "Hello %s,\n\nWelcome back.\n\nBest regards,\n%s\n\n";
-Function<String, Function<String, String>> createEmail = (from) -> (to) -> format(template, to, from);
+Function<String, Function<String, Function<String, String>>> emailGen =
+                (name) -> {
+                    return (company) -> {
+                        return (domain) -> {
+                            // `name` and `company` are available from the enclosing scope
+                            return name + "@" + company + "." + domain;
+                        };
+                    };
+                };
+```               
 
-Function<String, String> fromMike = createEmail.apply("Mike");
-Function<String, String> fromMat = createEmail.apply("Mat");
+By excluding the explicit `return` statements we can come up with a shorther, more readable version for `emailGen`:
 
-System.out.println(fromMike.apply("Tom"));
-System.out.println(fromMike.apply("Deb"));
-System.out.println(fromMat.apply("Mike"));
-
-System.out.println(createEmail.apply("Vic").apply("Nick"));
-```            
-
-With the output:
-
-```
-Hello Tom,
-
-Welcome back.
-
-Best regards,
-Mike
-
-
-Hello Deb,
-
-Welcome back.
-
-Best regards,
-Mike
-
-
-Hello Mike,
-
-Welcome back.
-
-Best regards,
-Mat
-
-
-Hello Nick,
-
-Welcome back.
-
-Best regards,
-Vic
+```java
+Function<String, Function<String, Function<String, String>>> emailGen =
+        name -> company -> domain -> name + "@" + company + "." + domain;
 ```
 
+`emailGen` is curried because it can be considered as a sequence of functions taking a single argument as input parameter.
 
+```java
+// Intermediary Step 1
+Function<String, Function<String, String>> withDomainDotNet = emailGen.apply("net");
+
+// Intermediary Step 2
+Function<String, String> withDomainNetAndCorp = withDomainDotNet.apply("corp");
+
+// Final step:
+String mikesEmail = withDomainNetAndCorp.apply("mike");
+System.out.println(mikesEmail); // Output: mike@corp.net
+```
+
+Or writing the sequence of functions directly:
+
+```java
+String tomsEmail = emailGen.apply("net").apply("corp").apply("tom");
+System.out.println(tomsEmail); // Output: tom@corp.net
+```        
+
+Java supports currying, but you can feel the language was not designed with this in mind. 
+
+It doesn't come by default, and having to write something like `Function<String, Function<String, Function<String, String>>>` only to reference a curried method with 3 input parameters is ugly. 
+
+Currying is useful when we decide we want to write our code in a purely functional way. Then it makes sense to define methods like this and pass them to higher order functions. 
+
+Is Java the right language to write functional code ?
 
 #### Example: Writing our own forEach method using lambdas
 
-The purpose of this exercise is to write our own `forEach()` method. This method will accept as input parameters:
-* An `Iterable<T>` representing the `Collection` over we iterate;
-* A `Predicate<T>` representing the condition we put on the elements of type `<T>` of the `Iterable<T>`;
-* A `BiConsumer<Integer, T>` representing the method that "consumes" the element of type `<T>` that passed the condition imposed by the second input parameter (the `Predicate<T>`). The `Integer` parameter of the `BiConsumer<Integer, T>` represents the current `index` of the collection;
+How many times we had to write code that was iterating over an array or a colllection, check if the elements match a certain condition and do something with those elements.
 
-The straightforward implementation can look this:
+What if encapsulate the condition in a `Predicate<T>` and what we do with the elements in a `Consumer<T>`? What if we can then use those methods to "inject" behavior in the higher level `forEach` method we are going to implement?
+
+The siganture for our own `forEach` method can look like:
 
 ```java
-public static <T> void forEach(Iterable<T> iterable, Predicate<T> predicate, BiConsumer<Integer, T> consumer) {
-    int i = 0;
-    Iterator<T> iterator = iterable.iterator();
-    while(iterator.hasNext()) {
-        T next = iterator.next();
-        if (predicate.test(next)) {
-                consumer.accept(i, next);
-        }   
-        i++;
+public static <T> void forEach(Iterable<T> elements, Predicate<T> condition, Consumer<T> consumer) {
+    for(T element : elements) {
+        if (condition.test(element)) { // Condition is not yet known -> the behavior will be received as an input parameter
+            consumer.accept(element); // What we do with the element is not yet known -> the behavior will be received as input parameter
+        }
     }
 }
-```
+```    
 
-Now this method is generic enough to iterate over a `List<Integer>` or a `List<String>`:
+Our method is generic enough now to be re-used in different scenarios:
 
 ```java
- List<Integer> integers = Arrays.asList(100, 50, 200, 300, 70, 30, 20, 500);
+List<Integer> integers = Arrays.asList(100, 50, 200, 300, 70, 30, 20, 500);
+List<String> names = Arrays.asList("Tom", "Kim", "Deb", "Mike", "Tony", "Tim");
 
-// Using the forEach() method we iterate over list and print only the elements bigger than 100 and their index
-forEach(integers, (el) -> el > 100, (i, el) -> {
-    System.out.printf("integers[%d]=%d\n", i, el);
-});
+
+// We create a curried function to define specialized `Predicate<T>`s
+Function<Integer, Predicate<Integer>> biggerThan =
+                n -> el -> (el > n);
+
+// Print on the console elements bigger than 10
+forEach(integers, biggerThan.apply(10), System.out::println);
 
 // OR
+// Print on the console elements bigger than 200
+forEach(integers, biggerThan.apply(200), System.out::println);
 
+// OR
+// Print on the console all the strings that contain T
+forEach(names, curry(String::contains, "T"), System.out::println);
 
-List<String> strings = Arrays.asList("Tom", "Kim", "Deb", "Mike", "Tony", "Tim");
+// OR
+// Print on the console all strings that have size == 3
+forEach(names, s -> s.length() == 3, System.out::println);
+```        
 
-// Using the forEach() we print only the names that have exactly three letters and print them (ignoring the index)
-forEach(strings, (el) -> el.length() == 3, (i, el) -> System.out.println(el));
+At this point you might wonder what the `curry` method means. Well the bad part is that there's no standard implementation in Java API, but for the sake of our `forEach` example I've written one by myself. Don't ask me why:
+
+```java
+public static <T1, T2> Predicate<T1> curry (BiPredicate<T1, T2> biPredicate, T2 el) {
+    return t1 -> biPredicate.test(t1, el);
+}
 ```
-
