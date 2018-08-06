@@ -400,14 +400,14 @@ public class EmailComposer {
 
 The `::` notation is mainly used to reference existing methods, static methods or even constructors. 
 
-So for example if we want to sort a `String[]` using the `compareToIgnoreCase()` method from the [String class](docs.oracle.com/javase/8/docs/api/java/lang/String.html) we would write something like this:
+So for example if we want to sort a `String[]` using the `compareToIgnoreCase()` method from the [String class](docs.oracle.com/javase/8/docs/api/java/lang/String.html) we could write something like this:
 
 ```java
 String[] stringArray = { "Andrei", "ion", "Sara", "Avraham", "Steven", "deborah", "michael" };
 Arrays.sort(stringArray, (s1, s2) -> s1.compareToIgnoreCase(s2));
 ```
 
-Instead of writing a lambda that uses the `compareToIgnoreCase()` explicitily we can reference the method directly just like in the following example:
+The good part is that instead of writing a lambda that uses the `compareToIgnoreCase()` explicitily, we can reference the method directly, like in the following example:
 
 ```java
  String[] stringArray = { "Andrei", "ion", "Sara", "Avraham", "Steven", "deborah", "michael" };
@@ -450,7 +450,7 @@ Supplier<StringBuilder> sbNaCreate1 = () -> new StringBuilder();
 Supplier<StringBuilder> sbNaCreate2 = StringBuilder::new;
 ```
 
-### Lambdas and Scope
+### Lambdas, Anonymous Inner Classes and Scope
 
 Important Rule: Lambdas are **not** syntactic sugar for *Anonymous Inner Classes*, even if they seem to be similar. What differentiates the two is how `scope` works:
 
@@ -489,7 +489,7 @@ public class ScopeExperiment {
 }
 ```
 
-The output will be:
+The output highlights the way the scope is "inherited":
 
 ```
 net.andreinc.jlands.generic.ScopeExperiment$1
@@ -500,7 +500,7 @@ Enclosing Scope
 
 Remember that Lambdas don't have their own concept of `this`. All they do is to "inherit" their enclosing scope.
 
-So if we change the signature of the `experiment()` method to `public static void experiment()` the code won't compile, all because of the lambda not being able to reference `this` from the static context. This doesn't affect inner classes:
+So if we change the signature of the `experiment()` method to `public static void experiment()` the code won't compile, all because of the lambda not being able to reference `this` from the static context. On the other hand the `static` keyword doesn't affect inner classes:
 
 ```java
 // DOES NOT COMPILE
@@ -539,7 +539,7 @@ public static void experiment() {
 }
 ```
 
-PS: Careful with this subtle difference!
+PS: Careful with this subtle difference! If you are working on a existing code base don't jump into replacing every anonymous inner class with lambdas!
 
 #### Partial Function Application
 
@@ -554,11 +554,13 @@ Let's define our own custom `@FunctionInterface` called `F3`:
 ```java
 @FunctionalInterface
 interface F3<T1, T2, T3, R> {
-    R apply(T1 x, T2 y, T3 z);
+    R apply(T1 x, T2 y, T3 z); // This is the only abstract method from the interface
 }
 ```
 
-`F3` is a function that accepts 3 parameters (`T1`, `T2`, `T3`) and returns a value, `R`. I find it perfect to reference an email generator:
+`F3` can be used to reference a function that accepts 3 parameters (`T1`, `T2`, `T3`) and returns a value - `R`. 
+
+For example we can reference a method that generates email addresses:
 
 ```java
  F3 <String, String, String, String> emailGen =
@@ -571,7 +573,7 @@ System.out.println(luke); // Output: luke@gmail.com
 
 But if we want to generate only emails for a certain corporation (`"corp.net"`) we can partially intialize our initial `emailGen`erator by binding values to (`company`=`"corp"`) and (`domain`=`"net"`):
 
-At this point `emailGen(name, company, domain)` becomes `corpEmailGen(name)`, a new lambda with reduced arity compared to the initial one:
+At this point `emailGen(name, company, domain)` becomes `corpEmailGen(name)`, a new lambda with reduced arity compared to the initial one. Reducing the arity means that we reduce the number of input parameters from 3 to 1, thus we can use a standard `Function<T, R>` to reference the new email generator:
 
 ```java
 
@@ -582,13 +584,11 @@ String mikeCorp = corpEmailGen.apply("mike"); // Output: mike@corp.net
 String lukeCorp = corpEmailGen.apply("luke"); // Output: luke@corp.net
 ```
 
-
-
 ### Currying
 
-Currying is a technique of translating the evaluation o a function that takes multiple arguments into evaluating a sequence of functions, each with **a single argument**.
+Currying is a technique of translating the evaluation of a function that takes multiple arguments into evaluating a sequence of functions, each with **a single argument**. 
 
-Currying can be seen as type of partial function application, they are related but certainly not the same. The biggest differences that curried functions return at every step another method with smaller arity that the previous one, while partially applied functions returnt the value instantly.
+Currying can be seen as type of partial function application. The two concepts are related but not exactly the same. The biggest difference is that curried functions return at every step another method with a smaller arity  hat the previous one (`initial_number_of_arguemnts-1`), while partially applied functions returnt the value "instantly", and don't have intermediary steps.
 
 For example, to build the `emailGen` from the previous example we won't need to define our own `@FunctionalInterface`, but rather we can use the following pattern:
 
@@ -632,40 +632,39 @@ String tomsEmail = emailGen.apply("net").apply("corp").apply("tom");
 System.out.println(tomsEmail); // Output: tom@corp.net
 ```        
 
-Java supports currying, but you can feel the language was not designed with this in mind. 
+Currying can be seen as a more flexible approach than "partial function application".
 
-It doesn't come by default, and having to write something like `Function<String, Function<String, Function<String, String>>>` only to reference a curried method with 3 input parameters is ... not nice. 
+Java supports currying, but you can feel the language was not designed with this in mind (for example in Haskell, a pure functional language, functions are curried by default).
+
+Having to write something like `Function<String, Function<String, Function<String, String>>>` only to reference a curried method with 3 input parameters is simply... not nice. 
 
 Currying is useful when we decide we want to write our code in a purely functional way. Then it makes sense to define curried methods and pass them to higher order functions, with the level of customization we want.
 
 #### Example: Writing our own forEach method using lambdas
 
-How many times we had to write code that was iterating over an array or a colllection, check if the elements match a certain condition and do something with those elements.
+How many times we had to write code that was iterating over an array or a colllection, check if the elements match a certain condition and do something with those elements ?
 
-What if encapsulate the condition in a `Predicate<T>` and what we do with the elements in a `Consumer<T>`? What if we can then use those methods to "inject" behavior in the higher level `forEach` method we are going to implement?
-
-The siganture for our own `forEach` method can look like:
+The functional approach to solve this small exercise would be to encapsulate the condition in a `Predicate<T>` and the consuming behavior for each element in a `Consumer<T>`, then we write a higher level function called `forEach` that receives the encapsulated behavior as input parameters:
 
 ```java
 public static <T> void forEach(Iterable<T> elements, Predicate<T> condition, Consumer<T> consumer) {
     for(T element : elements) {
         if (condition.test(element)) { // Condition is not yet known -> the behavior will be received as an input parameter
-            consumer.accept(element); // What we do with the element is not yet known -> the behavior will be received as input parameter
+            consumer.accept(element); // What we do with the element is not yet known -> the behavior will be received as an input parameter
         }
     }
 }
 ```    
 
-Our method is generic enough now to be re-used in different scenarios:
+With this implementation our method is generic enough now to be re-used in different scenarios:
 
 ```java
 List<Integer> integers = Arrays.asList(100, 50, 200, 300, 70, 30, 20, 500);
 List<String> names = Arrays.asList("Tom", "Kim", "Deb", "Mike", "Tony", "Tim");
 
 
-// We create a curried function to define specialized `Predicate<T>`s
-Function<Integer, Predicate<Integer>> biggerThan =
-                n -> el -> (el > n);
+// We create a curried function to define specialized `Predicate<T>`s to compare numbers
+Function<Integer, Predicate<Integer>> biggerThan = n -> el -> (el > n);
 
 // Print on the console elements bigger than 10
 forEach(integers, biggerThan.apply(10), System.out::println);
@@ -676,17 +675,26 @@ forEach(integers, biggerThan.apply(200), System.out::println);
 
 // OR
 // Print on the console all the strings that contain T
-forEach(names, curry(String::contains, "T"), System.out::println);
+forEach(names, (s) -> s.contains("T") , System.out::println);
 
 // OR
 // Print on the console all strings that have size == 3
 forEach(names, s -> s.length() == 3, System.out::println);
 ```        
 
-At this point you might wonder what the `curry` method means. Well the bad part is that there's no standard implementation in Java API, but for the sake of our `forEach` example I've written one by myself. Don't ask me why:
+### Example: Rethinking the Builder pattern using Lambda expressions
 
-```java
-public static <T1, T2> Predicate<T1> curry (BiPredicate<T1, T2> biPredicate, T2 el) {
-    return t1 -> biPredicate.test(t1, el);
-}
-```
+I am sure you've heard of the creational pattern called `Builder` before. It's a design pattern that is mainly used to help developers instatiate objects that have a lot of non-mandatory arguments (`null`s). 
+
+Using a builder helps us to avoid supplying the all-arguments-constructor a lot of `null` values for all the parameters that aren't mandatory. 
+
+Project Lombok has a [`@Builder`](https://projectlombok.org/features/Builder) annotation. Modern IDEs have plugins that can generated the builder code for us. 
+
+Back in the day, when we were still writing code by hand we were writing something like [this](https://en.wikipedia.org/wiki/Builder_pattern#Java). 
+
+
+
+
+
+
+
