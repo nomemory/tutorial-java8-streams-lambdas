@@ -4,7 +4,7 @@
 
 **half-life-3-confirmed**
 
-<sup>This tutorial assumes the reader has a good grasp of the Java Programming language features: Interfaces, Anonymous Classes, Collectins API, etc.</sup>
+<sup>This tutorial assumes the reader has a good grasp of the Java Programming language features: Interfaces, Anonymous Classes, Collectins API, Generics, etc.</sup>
 
 ## Introduction
 
@@ -594,7 +594,7 @@ For example, to build the `emailGen` from the previous example we won't need to 
 
 ```java
 Function<String, Function<String, Function<String, String>>> emailGen =
-                (name) -> {
+                return (name) -> {
                     return (company) -> {
                         return (domain) -> {
                             // `name` and `company` are available from the enclosing scope
@@ -634,11 +634,9 @@ System.out.println(tomsEmail); // Output: tom@corp.net
 
 Java supports currying, but you can feel the language was not designed with this in mind. 
 
-It doesn't come by default, and having to write something like `Function<String, Function<String, Function<String, String>>>` only to reference a curried method with 3 input parameters is ugly. 
+It doesn't come by default, and having to write something like `Function<String, Function<String, Function<String, String>>>` only to reference a curried method with 3 input parameters is ... not nice. 
 
-Currying is useful when we decide we want to write our code in a purely functional way. Then it makes sense to define methods like this and pass them to higher order functions. 
-
-Is Java the right language to write functional code ?
+Currying is useful when we decide we want to write our code in a purely functional way. Then it makes sense to define curried methods and pass them to higher order functions, with the level of customization we want.
 
 #### Example: Writing our own forEach method using lambdas
 
