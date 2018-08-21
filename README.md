@@ -8,7 +8,9 @@
 
 ## Introduction
 
-Before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our dev problems, let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
+The Streams API is probably one of the most anticipated and biggest addition for the Java language in the latest years. Basically starting with Java 8, fancier ways of interacting with data (traverse/manipulate) from Collections were introduced. 
+
+But before jumping into conclusions and start bragging about how Streams and Lambdas are going to suddenly solve all of our dev problems, let me start by telling you that you can continue writing excellent Java code without using any of those features. We did that before Java 8, didn't we ?
 
 Another important aspect is that you shouldn't jump directly into (re)writing everything in a "functional" style, just because it's "nice". 
 
@@ -681,17 +683,6 @@ forEach(names, (s) -> s.contains("T") , System.out::println);
 // Print on the console all strings that have size == 3
 forEach(names, s -> s.length() == 3, System.out::println);
 ```        
-
-### Example: Rethinking the Builder pattern using Lambda expressions
-
-I am sure you've heard of the creational pattern called `Builder` before. It's a design pattern that is mainly used to help developers instatiate objects that have a lot of non-mandatory arguments (`null`s). 
-
-Using a builder helps us to avoid supplying the all-arguments-constructor a lot of `null` values for all the parameters that aren't mandatory. 
-
-Project Lombok has a [`@Builder`](https://projectlombok.org/features/Builder) annotation. Modern IDEs have plugins that can generated the builder code for us. 
-
-Back in the day, when we were still writing code by hand we were writing something like [this](https://en.wikipedia.org/wiki/Builder_pattern#Java). 
-
 
 
 
