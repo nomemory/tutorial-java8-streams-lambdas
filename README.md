@@ -1,5 +1,7 @@
 # Streams & Lambdas
 
+((work in progress))
+
 ![streams-lambdas-main](media/streams-lambdas-main.jpg)
 
 **half-life-3-confirmed**
